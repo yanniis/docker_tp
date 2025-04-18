@@ -1,6 +1,6 @@
 # 📦 Projet Docker - Groupe 7
 
-> Branche utilisée : `master`
+🔍 Pour tester le projet, **assurez-vous d'être sur la branche `master`**. C'est **cette branche qui contient le code à utiliser et tester**.
 
 
 Partie 1 : 
