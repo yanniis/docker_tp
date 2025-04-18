@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  mysql:
+    build:
+      context: ./mysql
+    image: mysql
+    container_name: mysql_container
+    ports:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
+    volumes:
+      - db_volume:/var/lib/mysql
+    networks:
+      db_network:
+        aliases:
+          - mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ./app
+    image: app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - db_network
+      - site_network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:4743/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx
+    container_name: nginx_container
+    ports:
+      - "5423:80"
+    volumes:
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf 
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - site_network
+
+volumes:
+  db_volume:
+
+networks:
+  db_network:
+  site_network:
